@@ -1,4 +1,4 @@
-# Google Project Timesheet
+# Nearform Timesheet
 A library used to fill in a person's hours on a nearForm project timesheet in Google Sheets
 
 # Usage
