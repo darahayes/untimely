@@ -21,7 +21,7 @@ function ProjectTimeSheet (spreadsheetId, config, callback) {
 
   let initFunctions = {
     auth: jwtClient.authorize.bind(jwtClient),
-    // meta: getSheetMeta,
+    meta: getSheetMeta,
     ranges: getNameAndDateColumns
   }
 

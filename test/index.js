@@ -22,6 +22,7 @@ lab.experiment('ProjectTimeSheet Test Suite', { timeout: 5000 }, () => {
 
   lab.test('timesheet contains metadata', (done) => {
     expect(timesheet).to.include('meta')
+    expect(timesheet.meta).to.be.an.object()
     done()
   });
 
