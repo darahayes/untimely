@@ -1,10 +1,10 @@
 {
   "name": "google-project-timesheet",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A small module for interacting with employee timesheets in google sheets",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/lab/bin/lab"
   },
   "repository": {
     "type": "git",
