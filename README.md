@@ -10,7 +10,7 @@ First you must go to the Google [developer console](https://console.developers.g
 
 ```js
 const spreadsheetId = 'YourSpreadSheetID'
-const ProjectTimeSheet = require('google-project-timesheet')
+const ProjectTimeSheet = require('nearform-timesheet')
 
 let config = require('credentials.json')
 
