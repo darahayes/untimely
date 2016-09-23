@@ -11,13 +11,13 @@ function ProjectTimeSheet (spreadsheetId, config, callback) {
   }
   config = Object.assign({}, defaults, config)
 
-  if (!config.clientEmail || !config.secretKey) {
+  if (!config.client_email || !config.private_key) {
     throw Error('Missing google sheets credentials\n' +
       'please set $SHEETS_CLIENT_EMAIL and $SHEETS_SECRET_KEY or\n' +
-      'pass credentials via config.clientEmail and config.secretKey')
+      'pass credentials via config.client_email and config.private_key')
   }
 
-  let jwtClient = new Google.auth.JWT(config.clientEmail, null, config.secretKey, config.scope, null)
+  let jwtClient = new Google.auth.JWT(config.client_email, null, config.private_key, config.scope, null)
 
   let initFunctions = {
     auth: jwtClient.authorize.bind(jwtClient),

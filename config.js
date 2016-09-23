@@ -3,5 +3,5 @@ module.exports = {
   nameRange: 'A1:CI1',
   dateRange: 'D1:D1000',
   clientEmail: process.env.SHEETS_CLIENT_EMAIL,
-  secretKey: process.env.SHEETS_SECRET_KEY
+  secretKey: process.env.SHEETS_PRIVATE_KEY
 }
