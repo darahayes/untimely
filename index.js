@@ -21,72 +21,90 @@ function ProjectTimeSheet (spreadsheetId, config, callback) {
 
   let initFunctions = {
     auth: jwtClient.authorize.bind(jwtClient),
-    meta: getSheetMeta,
-    names: getEmployeeColumns,
-    dates: getDateColumn
+    // meta: getSheetMeta,
+    ranges: getNameAndDateColumns
   }
 
   async.series(initFunctions, (err, result) => {
     if (err) { return callback(err) }
     this.meta = result.meta
-    this.names = result.names
-    this.dates = result.dates
+    this.names = result.ranges.names
+    this.dates = result.ranges.dates
     this.setEmployeeDay = setEmployeeDay
     this.getEmployeeDay = getEmployeeDay
     callback(err, this)
   })
 
-  function setEmployeeDay (name, date, hours, notes, callback) {
-    if (this.names[name]) {
-      let row = this.dates.indexOf(date) + 1
-      if (row >= 1) {
-        let hoursCell = this.names[name].hours + row
-        let notesCell = this.names[name].notes + row
-        let opts = {
-          spreadsheetId: spreadsheetId,
-          auth: jwtClient,
-          range: hoursCell + ':' + notesCell,
-          valueInputOption: 'USER_ENTERED',
-          resource: {
-            values: [[hours, notes]]
+  // name date hours notes
+  function setEmployeeDay (opts, callback) {
+    if (typeof opts === 'function') {
+      callback = opts
+      return callback(Error('No options supplied'))
+    }
+    if (opts.name && opts.date) {
+      if (this.names[opts.name]) {
+        let row = this.dates.indexOf(opts.date) + 1
+        if (row >= 1) {
+          let hoursCell = this.names[opts.name].hours + row
+          let notesCell = this.names[opts.name].notes + row
+          let params = {
+            spreadsheetId: spreadsheetId,
+            auth: jwtClient,
+            range: hoursCell + ':' + notesCell,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+              values: [[opts.hours, opts.notes]]
+            }
           }
+          sheets.spreadsheets.values.update(params, callback)
         }
-        sheets.spreadsheets.values.update(opts, callback)
+        else {
+          callback(Error('Date ' + opts.date + ' not found'))
+        }
       }
       else {
-        callback(Error('Date ' + date + ' not found'))
+        callback(Error(opts.name + ' was not found in timesheet'))
       }
     }
     else {
-      callback(Error(name + ' was not found in timesheet'))
+      callback(Error('options not supplied - name and date are required'))
     }
   }
 
-  function getEmployeeDay (name, date, callback) {
-    if (this.names[name]) {
-      let row = this.dates.indexOf(date) + 1
-      if (row >= 1) {
-        let hoursCell = this.names[name].hours + row
-        let notesCell = this.names[name].notes + row
-        let opts = {
-          spreadsheetId: spreadsheetId,
-          auth: jwtClient,
-          range: hoursCell + ':' + notesCell,
-          majorDimension: 'ROWS'
-        }
-        sheets.spreadsheets.values.get(opts, (err, result) => {
-          callback(err, {
-            hours: (result.values ? result.values[0][0] : null),
-            notes: (result. values? result.values[0][1] : null)
+  function getEmployeeDay (opts, callback) {
+    if (typeof opts === 'function') {
+      callback = opts
+      return callback(Error('No options supplied'))
+    }
+    if (opts.name && opts.date) {
+      if (this.names[opts.name]) {
+        let row = this.dates.indexOf(opts.date) + 1
+        if (row >= 1) {
+          let hoursCell = this.names[opts.name].hours + row
+          let notesCell = this.names[opts.name].notes + row
+          let params = {
+            spreadsheetId: spreadsheetId,
+            auth: jwtClient,
+            range: hoursCell + ':' + notesCell,
+            majorDimension: 'ROWS'
+          }
+          sheets.spreadsheets.values.get(params, (err, result) => {
+            callback(err, {
+              hours: (result.values ? result.values[0][0] : null),
+              notes: (result. values? result.values[0][1] : null)
+            })
           })
-        })
+        }
+        else {
+          callback(Error('Date ' + opts.date + ' not found'))
+        }
       }
       else {
-        callback(Error('Date ' + date + ' not found'))
+        callback(Error(opts.name + ' was not found in timesheet'))
       }
     }
     else {
-      callback(Error(name + ' was not found in timesheet'))
+      callback(Error('options not supplied - name and date are required'))
     }
   }
 
@@ -96,26 +114,29 @@ function ProjectTimeSheet (spreadsheetId, config, callback) {
     })
   }
 
-  // Return key:value pairs in the format Name:Column e.g. 'Dara Hayes':'F'
-  function getEmployeeColumns(callback) {
-    sheets.spreadsheets.values.get({spreadsheetId: spreadsheetId, auth: jwtClient, range: config.nameRange}, (err, range) => {
-      if (err) { return callback(err) }
+  function getNameAndDateColumns(callback) {
+    let opts = {
+      spreadsheetId: spreadsheetId,
+      auth: jwtClient,
+      majorDimension: 'COLUMNS',
+      ranges : [config.dateRange, config.nameRange]
+    }
+    sheets.spreadsheets.values.batchGet(opts, (err, result) => {
+      if (err) {
+        return callback(err)
+      }
+      let dates = result.valueRanges[0].values[0]
+
       let names = {}
-      range.values[0].forEach((val, index) => {
-        if (val != '') {
-          names[val] = {
+      result.valueRanges[1].values.forEach((val, index) => {
+        if (val.length === 1) {
+          names[val[0]] = {
             hours: _columnName(index),
             notes: _columnName(index+1)
           };
         }
       })
-      callback(null, names)
-    })
-  }
-
-  function getDateColumn (callback) {
-    sheets.spreadsheets.values.get({spreadsheetId: spreadsheetId, auth: jwtClient, range: config.dateRange, majorDimension: 'COLUMNS'}, (err, range) => {
-      callback(err, range.values[0])
+      callback(null, {names: names, dates: dates})
     })
   }
 
