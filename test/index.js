@@ -4,7 +4,7 @@ const Lab = require('lab')
 const lab = exports.lab = Lab.script()
 const expect = Code.expect
 
-const ProjectTimeSheet = require('../')
+const ProjectTimeSheet = require('../').ProjectTimeSheet
 const testDocId = '1aIajHPtlAOWQrre3Ug6o-76ik01mNdMpdOOjLUdUp1M'
 
 lab.experiment('ProjectTimeSheet Test Suite', { timeout: 5000 }, () => {

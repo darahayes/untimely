@@ -1,5 +1,5 @@
 {
-  "name": "nearform-timesheet",
+  "name": "untimely",
   "version": "1.0.5",
   "description": "A small module for interacting with employee timesheets in google sheets",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/darahayes/nearform-timesheet.git"
+    "url": "git+https://github.com/darahayes/untimely.git"
   },
   "author": "Dara Hayes",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/darahayes/nearform-timesheet/issues"
+    "url": "https://github.com/darahayes/untimely/issues"
   },
-  "homepage": "https://github.com/darahayes/nearform-timesheet#readme",
+  "homepage": "https://github.com/darahayes/untimely#readme",
   "dependencies": {
     "async": "^2.0.1",
     "googleapis": "^13.0.0"

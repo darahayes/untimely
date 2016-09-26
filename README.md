@@ -1,4 +1,4 @@
-# Nearform Timesheet
+# Untimely
 A library used to fill in a person's hours on a nearForm project timesheet in Google Sheets
 
 # Usage
@@ -10,7 +10,7 @@ First you must go to the Google [developer console](https://console.developers.g
 
 ```js
 const spreadsheetId = 'YourSpreadSheetID'
-const ProjectTimeSheet = require('nearform-timesheet')
+const ProjectTimeSheet = require('untimely').ProjectTimeSheet
 
 let config = require('credentials.json')
 

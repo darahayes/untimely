@@ -146,4 +146,4 @@ function _columnName (i) {
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i % 26 >> 0]
 }
 
-module.exports = ProjectTimeSheet
+exports.ProjectTimeSheet = ProjectTimeSheet
