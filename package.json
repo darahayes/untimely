@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/darahayes/untimely.git"
+    "url": "git+https://github.com/nearform/untimely.git"
   },
   "author": "Dara Hayes",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/darahayes/untimely/issues"
+    "url": "https://github.com/nearform/untimely/issues"
   },
-  "homepage": "https://github.com/darahayes/untimely#readme",
+  "homepage": "https://github.com/nearform/untimely#readme",
   "dependencies": {
     "async": "^2.0.1",
     "googleapis": "^13.0.0"
