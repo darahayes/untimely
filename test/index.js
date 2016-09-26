@@ -24,7 +24,7 @@ lab.experiment('ProjectTimeSheet Test Suite', { timeout: 5000 }, () => {
     expect(timesheet).to.include('meta')
     expect(timesheet.meta).to.be.an.object()
     done()
-  });
+  })
 
   lab.test('timesheet has a dates property', (done) => {
     expect(timesheet).to.include('dates')
@@ -156,5 +156,4 @@ lab.experiment('ProjectTimeSheet Test Suite', { timeout: 5000 }, () => {
       done()
     })
   })
-
-});
+})

@@ -91,7 +91,7 @@ function ProjectTimeSheet (spreadsheetId, config, callback) {
           sheets.spreadsheets.values.get(params, (err, result) => {
             callback(err, {
               hours: (result.values ? result.values[0][0] : null),
-              notes: (result. values? result.values[0][1] : null)
+              notes: (result.values ? result.values[0][1] : null)
             })
           })
         }
@@ -108,18 +108,18 @@ function ProjectTimeSheet (spreadsheetId, config, callback) {
     }
   }
 
-  function getSheetMeta(callback) {
+  function getSheetMeta (callback) {
     sheets.spreadsheets.get({spreadsheetId: spreadsheetId, auth: jwtClient}, (err, result) => {
       callback(err, result)
     })
   }
 
-  function getNameAndDateColumns(callback) {
+  function getNameAndDateColumns (callback) {
     let opts = {
       spreadsheetId: spreadsheetId,
       auth: jwtClient,
       majorDimension: 'COLUMNS',
-      ranges : [config.dateRange, config.nameRange]
+      ranges: [config.dateRange, config.nameRange]
     }
     sheets.spreadsheets.values.batchGet(opts, (err, result) => {
       if (err) {
@@ -132,17 +132,16 @@ function ProjectTimeSheet (spreadsheetId, config, callback) {
         if (val.length === 1) {
           names[val[0]] = {
             hours: _columnName(index),
-            notes: _columnName(index+1)
-          };
+            notes: _columnName(index + 1)
+          }
         }
       })
       callback(null, {names: names, dates: dates})
     })
   }
-
 } // end of TimeSheet function
 
-function _columnName(i) {
+function _columnName (i) {
   return (i >= 26 ? _columnName((i / 26 >> 0) - 1) : '') +
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i % 26 >> 0]
 }
