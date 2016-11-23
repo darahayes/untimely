@@ -71,8 +71,8 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
       let column = spreadSheetData.names[data.name]
 
       let row = null
-
       let date = `${(data.day < 10 ? `0` : ``) + data.day}/${(data.month < 10 ? `0` : ``) + data.month}/${data.year - 2000}`
+      let time = data.unit === 'day' ? data.time : data.time / 8
 
       for (var i in spreadSheetData.dates) {
         if (spreadSheetData.dates[i] === date) {
@@ -94,7 +94,7 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
         range: hoursCell + ':' + notesCell,
         valueInputOption: 'USER_ENTERED',
         resource: {
-          values: [[data.time, data.notes]]
+          values: [[time, data.notes]]
         }
       }
       sheets.spreadsheets.values.update(params, (err) => {
@@ -103,7 +103,7 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
         }
         return done(null, {
           date: date,
-          time: data.time,
+          time: time,
           notes: data.notes
         })
       })
