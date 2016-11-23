@@ -65,7 +65,7 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
       if (err) return done(err)
 
       if (!spreadSheetData.names[data.name]) {
-        return done(Error(opts.name + ' was not found in timesheet'))
+        return done(data.name + ' was not found in timesheet')
       }
 
       let column = spreadSheetData.names[data.name]
@@ -82,7 +82,7 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
       }
 
       if (!row) {
-        return done(Error('Date ' + data.date + ' not found'))
+        return done('Date ' + date + ' not found')
       }
 
       let hoursCell = spreadSheetData.names[data.name].hours + row
