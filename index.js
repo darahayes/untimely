@@ -61,32 +61,18 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
   validateSetData(spreadsheetId, client, data, (err) => {
     if (err) return done(err)
 
-    readSpreadsheetData(spreadsheetId, client, (err, spreadSheetData) => {
+    data.date = `${(data.day < 10 ? `0` : ``) + data.day}/${(data.month < 10 ? `0` : ``) + data.month}/${data.year - 2000}`
+    data.time = data.unit === 'day' ? data.time : data.time / 8
+
+    readCellData(spreadsheetId, client, data, (err, spreadSheetData) => {
       if (err) return done(err)
 
-      if (!spreadSheetData.names[data.name]) {
-        return done(data.name + ' was not found in timesheet')
+      if (spreadSheetData.time) {
+        return done(`Data already exists for project ${data.project}, date ${spreadSheetData.date}`)
       }
 
-      let column = spreadSheetData.names[data.name]
-
-      let row = null
-      let date = `${(data.day < 10 ? `0` : ``) + data.day}/${(data.month < 10 ? `0` : ``) + data.month}/${data.year - 2000}`
-      let time = data.unit === 'day' ? data.time : data.time / 8
-
-      for (var i in spreadSheetData.dates) {
-        if (spreadSheetData.dates[i] === date) {
-          row = parseInt(i) + 1
-          break
-        }
-      }
-
-      if (!row) {
-        return done('Date ' + date + ' not found')
-      }
-
-      let hoursCell = spreadSheetData.names[data.name].hours + row
-      let notesCell = spreadSheetData.names[data.name].notes + row
+      let hoursCell = spreadSheetData.hoursCell
+      let notesCell = spreadSheetData.notesCell
 
       let params = {
         spreadsheetId: spreadsheetId,
@@ -94,7 +80,7 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
         range: hoursCell + ':' + notesCell,
         valueInputOption: 'USER_ENTERED',
         resource: {
-          values: [[time, data.notes]]
+          values: [[data.time, data.notes]]
         }
       }
       sheets.spreadsheets.values.update(params, (err) => {
@@ -102,8 +88,8 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
           return done(err)
         }
         return done(null, {
-          date: date,
-          time: time,
+          date: data.date,
+          time: data.time,
           notes: data.notes
         })
       })
@@ -111,41 +97,68 @@ function setEmployeeDay(spreadsheetId, client, data, done) {
   })
 }
 
-function getEmployeeDay(opts, callback) {
-  if (typeof opts === 'function') {
-    callback = opts
-    return callback(Error('No options supplied'))
-  }
-  if (opts.name && opts.date) {
-    if (this.names[opts.name]) {
-      let row = this.dates.indexOf(opts.date) + 1
-      if (row >= 1) {
-        let hoursCell = this.names[opts.name].hours + row
-        let notesCell = this.names[opts.name].notes + row
-        let params = {
-          spreadsheetId: spreadsheetId,
-          auth: jwtClient,
-          range: hoursCell + ':' + notesCell,
-          majorDimension: 'ROWS'
-        }
-        sheets.spreadsheets.values.get(params, (err, result) => {
-          callback(err, {
-            hours: (result.values ? result.values[0][0] : null),
-            notes: (result.values ? result.values[0][1] : null)
-          })
-        })
-      }
-      else {
-        callback(Error('Date ' + opts.date + ' not found'))
+function getEmployeeDay(spreadsheetId, client, data, done) {
+  validateGetData(spreadsheetId, client, data, (err) => {
+    if (err) return done(err)
+
+    data.date = `${(data.day < 10 ? `0` : ``) + data.day}/${(data.month < 10 ? `0` : ``) + data.month}/${data.year - 2000}`
+
+    readCellData(spreadsheetId, client, data, (err, response) => {
+      if (err) return done(err)
+
+      // clean the response
+      delete response.hoursCell
+      delete response.notesCell
+
+      return done(null, response)
+    })
+  })
+}
+
+function readCellData(spreadsheetId, client, data, done) {
+  readSpreadsheetData(spreadsheetId, client, (err, spreadSheetData) => {
+    if (err) return done(err)
+
+    if (!spreadSheetData.names[data.name]) {
+      return done(data.name + ' was not found in timesheet')
+    }
+
+    let column = spreadSheetData.names[data.name]
+
+    let row = null
+
+    for (var i in spreadSheetData.dates) {
+      if (spreadSheetData.dates[i] === data.date) {
+        row = parseInt(i) + 1
+        break
       }
     }
-    else {
-      callback(Error(opts.name + ' was not found in timesheet'))
+
+    if (!row) {
+      return done('Date ' + data.date + ' not found')
     }
-  }
-  else {
-    callback(Error('options not supplied - name and date are required'))
-  }
+
+    let hoursCell = spreadSheetData.names[data.name].hours + row
+    let notesCell = spreadSheetData.names[data.name].notes + row
+
+    let params = {
+      spreadsheetId: spreadsheetId,
+      auth: client,
+      range: hoursCell + ':' + notesCell,
+      majorDimension: 'ROWS'
+    }
+    sheets.spreadsheets.values.get(params, (err, result) => {
+      if (err) return done(err)
+
+      return done(null, {
+        time: (result.values ? result.values[0][0] : null),
+        notes: (result.values ? result.values[0][1] : null),
+        hoursCell: hoursCell,
+        notesCell: notesCell,
+        date: data.date
+      })
+    })
+  })
 }
 
 function _columnName(i) {
@@ -167,6 +180,28 @@ function validateSetData(spreadsheetId, client, data, done) {
         notes: Joi.string().min(3).required(),
         unit: Joi.string().valid('hour', 'day').required(),
         type: Joi.string().required(),
+        year: Joi.number().min(2015).required(),
+        month: Joi.number().min(1).max(12).required(),
+        day: Joi.number().min(1).max(31).required()
+      }).required(), err => {
+        if (err) return done(err)
+
+        done()
+      })
+    })
+  })
+}
+
+function validateGetData(spreadsheetId, client, data, done) {
+  Joi.validate(spreadsheetId, Joi.string().required(), err => {
+    if (err) return done(err)
+
+    Joi.validate(client, Joi.object().required(), err => {
+      if (err) return done(err)
+
+      Joi.validate(data, Joi.object().keys({
+        name: Joi.string().required(),
+        project: Joi.string().required(),
         year: Joi.number().min(2015).required(),
         month: Joi.number().min(1).max(12).required(),
         day: Joi.number().min(1).max(31).required()
