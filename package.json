@@ -4,7 +4,9 @@
   "description": "A small module for interacting with employee timesheets in google sheets",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/lab/bin/lab"
+    "test": "node_modules/lab/bin/lab",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -19,7 +21,8 @@
   "dependencies": {
     "async": "^2.0.1",
     "googleapis": "^13.0.0",
-    "joi": "^10.0.1"
+    "joi": "^10.0.1",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "code": "^4.0.0",
@@ -28,5 +31,6 @@
     "eslint-plugin-promise": "^2.0.1",
     "eslint-plugin-standard": "^2.0.0",
     "lab": "^11.0.1"
-  }
+  },
+  "snyk": true
 }
