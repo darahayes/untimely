@@ -18,7 +18,7 @@
   "homepage": "https://github.com/nearform/untimely#readme",
   "dependencies": {
     "async": "^2.0.1",
-    "googleapis": "^13.0.0",
+    "googleapis": "^59.0.0",
     "joi": "^10.0.1"
   },
   "devDependencies": {
